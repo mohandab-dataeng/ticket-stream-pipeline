@@ -1,8 +1,8 @@
-# Realtime Support Pipeline
+# Ticket Stream Pipeline
 
-Pipeline de streaming temps réel pour la gestion de tickets clients, construit avec **Redpanda** (broker compatible Kafka) et **PySpark Structured Streaming**, entièrement conteneurisé avec Docker Compose.
+Ce projet consiste en un Pipeline de streaming en temps réel pour la gestion de tickets clients(sav, contact mail, etc.), construit avec **Redpanda** (broker compatible Kafka) et **PySpark**, l etout est entièrement conteneurisé avec Docker Compose.
 
-Projet réalisé dans le cadre du parcours Data Engineer (OpenClassrooms) — POC simulant l'ingestion et le traitement en temps réel des tickets de support d'une entreprise industrielle.
+Il s'agit d'un POC simulant l'ingestion et le traitement en temps réel des tickets de support d'une dans n'importe quelle entreprise.
 
 ## Contexte
 
@@ -48,9 +48,9 @@ flowchart LR
 
 **Flux de données** :
 1. `produce_tickets.py` génère un ticket client fictif (via Faker) chaque seconde et le publie dans le topic Redpanda `client_tickets`
-2. `consume_tickets.py` lit ce topic en continu (Spark Structured Streaming), décode le JSON, et l'enrichit d'une colonne `assigned_team` selon le type de demande
+2. `consume_tickets.py` lit ce topic en continu (Spark Structured Streaming), décode le JSON, et l'enrichit d'une colonne `assigned_team` selon le type de demande comme dans la réalité on dispatch les ticket pour les équipes qui la traiteront.
 3. Deux exports en parallèle : le détail de chaque ticket en **Parquet**, et le comptage de tickets par type (fenêtres de 30s) en **JSON**
-4. **Redpanda Console** permet de visualiser le topic et les messages en temps réel via une interface web
+4. **Redpanda Console** permet de visualiser le topic et les messages en temps réel via l´interface web
 
 ## Stack technique
 
@@ -92,7 +92,7 @@ ticket-stream-pipeline/
 
 ```bash
 git clone https://github.com/mohandab-dataeng/realtime-support-pipeline.git
-cd realtime-support-pipeline
+cd ticket-stream-pipeline
 docker compose up --build
 ```
 
@@ -100,7 +100,7 @@ Cette commande construit les images du producer et du consumer, puis démarre le
 
 ### Vérifier que ça tourne
 
-**Logs du consumer** (tickets traités + agrégations en direct) :
+**Logs du consumer** (tickets traités + agrégations en direct, normalement on devrai voir defiler les ticket arriver) :
 ```bash
 docker logs -f ticket-consumer
 ```
@@ -122,13 +122,13 @@ ls output/tickets_by_type/json/
 docker compose down
 ```
 
-## Choix techniques notables
+## Choix techniques
 
 - **`kafka-python-ng`** plutôt que `kafka-python` : le paquet original est incompatible avec Python 3.12+ (`ModuleNotFoundError` sur `kafka.vendor.six.moves`), ce fork corrige le problème.
 - **Connecteur `spark-sql-kafka-0-10_2.13:4.2.0`** : la version doit correspondre exactement à la version de PySpark installée (4.2.0) et à son suffixe Scala (2.13 depuis Spark 4.0+).
-- **`BOOTSTRAP_SERVERS` paramétrable via variable d'environnement** : `localhost:19092` en exécution locale, `redpanda-0:9092` en Docker Compose (adressage interne au réseau Docker) — un seul code, deux contextes.
+- **`BOOTSTRAP_SERVERS` paramétrable via variable d'environnement** : `localhost:19092` en exécution locale, `redpanda-0:9092` en Docker Compose (adressage interne au réseau Docker), un seul code, deux contextes.
 - **Healthcheck sur Redpanda** (`rpk cluster health`) : garantit que le producer et le consumer n'essaient de se connecter qu'une fois le broker réellement opérationnel, pas juste démarré.
-- **`outputMode("append")` pour les exports fichiers** : contrainte de Spark Structured Streaming — un sink fichier n'accepte pas `update` pour une agrégation avec fenêtre, une fenêtre n'est écrite qu'une fois définitivement close (watermark d'1 minute).
+- **`outputMode("append")` pour les exports fichiers** : contrainte de Spark Structured Streaming, un sink fichier n'accepte pas `update` pour une agrégation avec fenêtre, une fenêtre n'est écrite qu'une fois définitivement close (watermark d'1 minute).
 
 ## Démonstration vidéo
 
@@ -136,4 +136,4 @@ docker compose down
 
 ## Auteur
 
-Mohand — Formation Data Engineer, OpenClassrooms
+Mohand Abaran - Data Engineer
