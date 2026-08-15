@@ -1,0 +1,13 @@
+# Sorties Spark (régénérées à chaque exécution, pas de code)
+output/
+
+# Environnements Python
+/.venv
+__pycache__/
+*.pyc
+
+# uv
+.uv/
+
+# Fichiers système
+.DS_Store

@@ -1,0 +1,87 @@
+name: ticket-stream-pipeline
+
+networks:
+  redpanda_network:
+    driver: bridge
+
+volumes:
+  redpanda-data:
+    # Stockage persistant des messages Redpanda : sans ce volume, tout le
+    # contenu des topics disparaîtrait à chaque redémarrage du conteneur.
+
+services:
+
+  redpanda-0:
+    image: docker.redpanda.com/redpandadata/redpanda:v25.2.1
+    container_name: redpanda-0
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=1G
+      - --overprovisioned
+      - --node-id=0
+      - --kafka-addr=internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr=internal://redpanda-0:9092,external://localhost:19092
+      - --pandaproxy-addr=internal://0.0.0.0:8082,external://0.0.0.0:18082
+      - --advertise-pandaproxy-addr=internal://redpanda-0:8082,external://localhost:18082
+    ports:
+      - "19092:19092"
+      - "18081:18081"
+      - "18082:18082"
+      - "19644:9644"
+    volumes:
+      - redpanda-data:/var/lib/redpanda/data
+    networks:
+      - redpanda_network
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  redpanda-console:
+    image: docker.redpanda.com/redpandadata/console:v3.1.0
+    container_name: redpanda-console
+    entrypoint: /bin/sh
+    command: -c 'echo "$$CONSOLE_CONFIG_FILE" > /tmp/config.yml && /app/console -config.filepath /tmp/config.yml'
+    environment:
+      CONFIG_FILEPATH: /tmp/config.yml
+      CONSOLE_CONFIG_FILE: |
+        kafka:
+          brokers: ["redpanda-0:9092"]
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redpanda-0
+    networks:
+      - redpanda_network
+
+  producer:
+    build: ./producer
+    container_name: ticket-producer
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: "redpanda-0:9092"
+    depends_on:
+      redpanda-0:
+        condition: service_healthy
+    networks:
+      - redpanda_network
+    restart: on-failure
+
+  consumer:
+    build: ./consumer
+    container_name: ticket-consumer
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: "redpanda-0:9092"
+    depends_on:
+      redpanda-0:
+        condition: service_healthy
+      producer:
+        condition: service_started
+    volumes:
+      - ./output:/app/output
+    networks:
+      - redpanda_network
+    restart: on-failure
