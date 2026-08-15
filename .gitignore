@@ -8,6 +8,7 @@ __pycache__/
 
 # uv
 .uv/
+verify_exports.py
 
 # Fichiers système
 .DS_Store
