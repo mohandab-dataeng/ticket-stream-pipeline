@@ -1,9 +1,9 @@
 # Ticket Stream Pipeline
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white) ![PySpark](https://img.shields.io/badge/PySpark-4.2.0-E25A1C?logo=apachespark&logoColor=white) ![Redpanda](https://img.shields.io/badge/Redpanda-Kafka--compatible-FF4B26?logo=apachekafka&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 
-Ce projet consiste en un Pipeline de streaming en temps réel pour la gestion de tickets clients(sav, contact mail, etc.), construit avec **Redpanda** (broker compatible Kafka) et **PySpark**, l etout est entièrement conteneurisé avec Docker Compose.
+Ce projet consiste en un Pipeline de streaming en temps réel pour la gestion de tickets clients(sav, contact mail, etc.), construit avec **Redpanda** (broker compatible Kafka) et **PySpark**, le tout est entièrement conteneurisé avec Docker Compose.
 
-Il s'agit d'un POC simulant l'ingestion et le traitement en temps réel des tickets de support d'une dans n'importe quelle entreprise.
+Il s'agit d'un POC simulant l'ingestion et le traitement en temps réel des tickets de support d'une DB dans n'importe quelle entreprise.
 
 ## Contexte
 
