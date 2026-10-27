@@ -131,10 +131,6 @@ docker compose down
 - **Healthcheck sur Redpanda** (`rpk cluster health`) : garantit que le producer et le consumer n'essaient de se connecter qu'une fois le broker réellement opérationnel, pas juste démarré.
 - **`outputMode("append")` pour les exports fichiers** : contrainte de Spark Structured Streaming, un sink fichier n'accepte pas `update` pour une agrégation avec fenêtre, une fenêtre n'est écrite qu'une fois définitivement close (watermark d'1 minute).
 
-## Démonstration vidéo
-
-[Lien vers la vidéo de démonstration à ajouter ici]
-
 ## Auteur
 
 Mohand Abaran - Data Engineer
